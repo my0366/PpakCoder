@@ -8,11 +8,11 @@
 import Foundation
 import UIKit
 import Kingfisher
-
+import RxSwift
 class HomeView : UIViewController {
-    
+
     override func viewDidLoad() {
-//        PostViewModel.shared.fetchAllPost(page: 1, order_by: "desc", per_page: 10, status: "all") { res in
-//            print(" postData[1] = \(PostViewModel.shared.postData.count)")
-        }
+    
     }
+
+}

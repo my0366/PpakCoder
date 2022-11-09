@@ -8,8 +8,8 @@
 import Foundation
 
 struct Post : Codable {
-    var data : [PostData]
-    var meta : MetaData
+    var data : [PostData]?
+    var meta : MetaData?
     var message : String
 }
 

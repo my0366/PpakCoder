@@ -13,10 +13,11 @@ enum Router: URLRequestConvertible {
     case login(email : String, password : String)
     case register(name : String, email : String, password : String)
     case getAllPost(page : Int, order_by : String, per_page : Int, status : String)
+    case getPostDetail(id : Int)
     // MARK: - Methods
     var method: HTTPMethod {
         switch self {
-        case .getAllPost:
+        case .getAllPost, .getPostDetail:
             return .get
         case .login, .register:
             return .post
@@ -32,6 +33,8 @@ enum Router: URLRequestConvertible {
             return "/user/login"
         case .register:
             return "/user/register"
+        case .getPostDetail(let id):
+            return "/posts/\(id)"
         }
     }
     
@@ -50,6 +53,8 @@ enum Router: URLRequestConvertible {
             return ["name" : name
                     ,"email" : email
                     ,"password" : password]
+        case .getPostDetail(id: let id):
+            return nil
         }
     }
     

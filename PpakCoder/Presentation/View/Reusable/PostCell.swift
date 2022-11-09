@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 class PostCell : UICollectionViewCell {
-//    @IBOutlet weak var postImage: UIImageView!
+    @IBOutlet weak var postImage: UIImageView!
     @IBOutlet weak var postName: UILabel!
-//    @IBOutlet weak var postPublisheer: UILabel!
+    @IBOutlet weak var postPublisheer: UILabel!
 }
