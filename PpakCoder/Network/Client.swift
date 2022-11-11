@@ -19,10 +19,9 @@ class Client {
     typealias onSuccess<T> = ((T) -> Void)
     typealias onFailure = ((_ error: Error) -> Void)
     
-    
     //Object : Model, router : Router에 요청할 함수, (success, failure) -> 클로저로 성공,실패시 Network요청시 받아온 데이터 탈출
     static func request<T>(_ object: T.Type,
-                               router: Router,
+                               router: URLRequestConvertible,
                                success: @escaping onSuccess<T>,
                                failure: @escaping onFailure) where T: Decodable  {
             session.request(router)
@@ -37,6 +36,4 @@ class Client {
                     }
                 }
         }
-    
-    
 }

@@ -9,11 +9,11 @@ import Foundation
 
 struct LoginData : Codable {
     
-    var data : Data?
+    var data : UserData?
     var message : String
 }
 
-struct Data : Codable {
+struct UserData : Codable {
     var user : LoginUser
     var token : Token
 }

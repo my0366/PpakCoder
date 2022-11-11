@@ -8,18 +8,19 @@
 import Foundation
 import Alamofire
 
-enum Router: URLRequestConvertible {
+enum PostRouter: URLRequestConvertible {
     // MARK: - Cases
     case login(email : String, password : String)
     case register(name : String, email : String, password : String)
     case getAllPost(page : Int, order_by : String, per_page : Int, status : String)
     case getPostDetail(id : Int)
+    case uploadPost(Upload)
     // MARK: - Methods
     var method: HTTPMethod {
         switch self {
         case .getAllPost, .getPostDetail:
             return .get
-        case .login, .register:
+        case .login, .register, .uploadPost:
             return .post
         }
     }
@@ -35,6 +36,8 @@ enum Router: URLRequestConvertible {
             return "/user/register"
         case .getPostDetail(let id):
             return "/posts/\(id)"
+        case .uploadPost:
+            return "/posts"
         }
     }
     
@@ -53,7 +56,9 @@ enum Router: URLRequestConvertible {
             return ["name" : name
                     ,"email" : email
                     ,"password" : password]
-        case .getPostDetail(id: let id):
+        case .getPostDetail:
+            return nil
+        case .uploadPost:
             return nil
         }
     }
@@ -64,8 +69,25 @@ enum Router: URLRequestConvertible {
         case .login, .register:
             return JSONEncoding.default
         default:
-            return URLEncoding(destination: .queryString)
+            return URLEncoding.default
         }
+    }
+    
+    var multipartFormData: MultipartFormData {
+        let multipartFormData = MultipartFormData()
+        switch self {
+        case .uploadPost(let uploadData):
+            multipartFormData.append(uploadData.title.data(using: .utf8) ?? Data(), withName: "title")
+            multipartFormData.append(uploadData.content.data(using: .utf8) ?? Data(), withName: "content")
+            multipartFormData.append("\(uploadData.published)".data(using: .utf8) ?? Data() , withName: "is_published")
+            uploadData.image.forEach { image in
+                multipartFormData.append(image, withName: "upload_images[]", fileName: "\(image).png")
+            }
+        default: ()
+            
+        }
+    
+        return multipartFormData
     }
     
     // MARK: - URL Request
@@ -76,15 +98,15 @@ enum Router: URLRequestConvertible {
         // HTTP Method
         urlRequest.method = method
         
-        // Common Headers
-//        urlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
-//        urlRequest.setValue("aplication/json", forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
         
+        // Common Headers
+//        xurlRequest.setValue(ContentType.json.rawValue, forHTTPHeaderField: HTTPHeaderField.contentType.rawValue)
+        //        urlRequest.setValue("aplication/json", forHTTPHeaderField: HTTPHeaderField.acceptType.rawValue)
         // Parameters
         if let parameters = parameters {
             return try encoding.encode(urlRequest, with: parameters)
         }
-
+        
         return urlRequest
     }
 }

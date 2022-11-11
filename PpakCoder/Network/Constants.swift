@@ -6,14 +6,26 @@
 //
 
 import Foundation
+import Alamofire
+import SwiftKeychainWrapper
 
 struct Constants {
     // MARK: - Base URL
     static var baseURL: URL {
         return URL(string: "https://phplaravel-574671-2962113.cloudwaysapps.com/api/v1")!
     }
-    
-    static let token = ""
+}
+
+class RequireToken: RequestInterceptor {
+    func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+        
+        //JWT Token
+        var urlRequest = urlRequest
+        
+        urlRequest.setValue(KeychainWrapper.standard.string(forKey: "access-token"), forHTTPHeaderField: "Authorization")
+        completion(.success(urlRequest))
+        
+    }
 }
 
 enum HTTPHeaderField: String {

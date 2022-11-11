@@ -17,16 +17,21 @@ struct PostData : Codable, Hashable {
     var id : Int
     var title : String
     var content : String
-    var images : [Image]
+    var images : [Image]?
     var is_published : Bool
     var user_id : Int?
     var created_at : String
     var updated_at : String?
 }
 
+struct PostDetail : Codable {
+    var data : PostData?
+    var message : String?
+}
+
 struct Image : Codable, Hashable {
-    var id : Int?
-    var url : String?
+    var id : Int
+    var url : String
 }
 
 struct MetaData: Codable, Hashable {

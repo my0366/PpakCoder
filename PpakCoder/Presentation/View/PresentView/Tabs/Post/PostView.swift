@@ -11,44 +11,48 @@ import Kingfisher
 import SkeletonView
 import RxSwift
 
-
-
-class PostView : UIViewController {
-    
+class PostView : UIViewController, PostViewProtocol {
     
     @IBOutlet weak var postCollectionView: UICollectionView!
     
-    var postVM : PostViewModel? = PostViewModel() {
+    
+    var postVM : PostViewModel = PostViewModel.shared {
         didSet {
             print(#fileID, #function, #line, "- viewModel: \(postVM)")
         }
     }
      
-    
     let bag = DisposeBag()
     var postData : [PostData] = []
     override func viewDidLoad() {
+        print("init \(postVM.isLoading.value)")
         bindViewModel(postVM)
         postCollectionView.dataSource = self
         postCollectionView.delegate = self
         postCollectionView.showSkeleton()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                self?.view.hideSkeleton() // Hide Skeleton
-            }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
         
+        if !postVM.isLoading.value {
+            self.view.hideSkeleton()
+        }
     }
     
     func bindViewModel(_ viewModel: PostViewModel?){
-        
         guard let viewModel = viewModel else {
             print("뷰모델 없어요")
             return
         }
         viewModel.postData.bind(to: self.rx.postData).disposed(by: DisposeBag())
+        
     }
+    
+    @IBAction func addPostButton(_ sender: Any) {
+        guard let postUploadVC = self.storyboard?.instantiateViewController(withIdentifier: "PostUploadView") else {
+            return
+        }
+        self.navigationController?.pushViewController(postUploadVC, animated: true)
+        
+    }
+    
 }
 
 extension PostView: SkeletonCollectionViewDataSource, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout {
@@ -63,11 +67,18 @@ extension PostView: SkeletonCollectionViewDataSource, UICollectionViewDelegate,U
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PostCell", for: indexPath) as! PostCell
         let post = postData[indexPath.row]
+       
+        if let image = post.images {
+            for i in image {
+                cell.postImage.kf.setImage(with: URL(string: i.url))
+            }
+        } else {
+            cell.postImage.image = UIImage.init(named: "NoImage")
+        }
         
-        cell.postImage.kf.setImage(with: URL(string: "https://res.cloudinary.com/ppak-coders-com/image/upload/v1666806231/hqsyofpx1s3jtao0gjuj.png"))
         cell.postName.text = post.title
     
-        cell.postPublisheer.text = "\(post.user_id)"
+        cell.postPublisheer.text = "\(post.id)"
         
         return cell
     }
@@ -79,7 +90,7 @@ extension PostView: SkeletonCollectionViewDataSource, UICollectionViewDelegate,U
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let itemSpacing : CGFloat = 10
         let textAreaHeight : CGFloat = 65
-        let width : CGFloat = (collectionView.bounds.width - itemSpacing) / 2
+        let width : CGFloat = (collectionView.bounds.width - itemSpacing) / 2.3
         let height : CGFloat = width * 10 / 8 + textAreaHeight
         return CGSize(width: width, height: height)
     }
