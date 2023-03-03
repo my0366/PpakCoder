@@ -30,10 +30,14 @@ class PostService {
         }
     }
     
-    func getDetailPageData(id : Int) -> Observable<PostDetail> {
+    func getDetailPageData(id : Int) -> Observable<PostData> {
         return Observable.create { observer in
             Client.request(PostDetail.self, router: PostRouter.getPostDetail(id: id)) { data in
-                observer.onNext(data)
+                if let post = data.data {
+                    observer.onNext(post)
+                } else {
+                    print("error")
+                }
             } failure: { error in
                 observer.onError(error)
             }

@@ -10,9 +10,9 @@ import RxSwift
 
 protocol PostViewProtocol {
     
-    var postVM : PostViewModel { get set }
+//    var postVM : PostViewModel? { get set }
     
-    func bindViewModel(_ viewModel: PostViewModel?)
+//    func bindViewModel(_ viewModel: PostViewModel?)
     
     var bag : DisposeBag { get } 
 }

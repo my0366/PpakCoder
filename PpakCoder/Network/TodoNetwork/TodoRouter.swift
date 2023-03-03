@@ -26,8 +26,10 @@ enum TodoRouter: URLRequestConvertible {
     // MARK: - Paths
     var path: String {
         switch self {
-        case .getAllTodo, .uploadTodo:
+        case .getAllTodo:
             return "/todos"
+        case .uploadTodo:
+            return "/todos-json"
         }
     }
     
@@ -38,8 +40,9 @@ enum TodoRouter: URLRequestConvertible {
             return ["page" : page
                     ,"order_by" : order_by
                     ,"per_page" :per_page]
-        case .uploadTodo:
-            return nil
+        case .uploadTodo(let title, let done):
+            return ["title" : title,
+                    "is_done" : done]
         }
     }
     
@@ -49,7 +52,7 @@ enum TodoRouter: URLRequestConvertible {
         case .getAllTodo:
             return URLEncoding.default
         default:
-            return URLEncoding.default
+            return JSONEncoding.default
         }
     }
     

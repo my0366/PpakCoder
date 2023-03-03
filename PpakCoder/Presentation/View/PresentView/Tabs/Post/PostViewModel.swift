@@ -8,6 +8,7 @@
 import Foundation
 import RxSwift
 import RxCocoa
+import UIKit
 
 @MainActor
 class PostViewModel {
@@ -18,11 +19,26 @@ class PostViewModel {
     
     let disposeBag = DisposeBag()
     
+    var loadingVC : LoadingView? = nil
+    
     init() {
         print(#fileID, #function, #line, "- ")
-        fetchTodosWithObservable()
+        initFetchPostViewModel()
         
         NotificationCenter.default.addObserver(self, selector: #selector(getPostDetail(_:)), name: Notification.Name(rawValue: PostViewModel.postDetailNotificationName), object: nil)
+        
+        isLoading.subscribe { [weak self] value in
+            guard let self = self else { return }
+            if let isLoading = value.element {
+                
+                print("loading value = \(isLoading)")
+                if isLoading {
+//                    self.loadingVC = self.showLoadingPopup()
+                } else {
+//                    self.stopLoadingPopup(loadingVC: self.loadingVC)
+                }
+            }
+        }.disposed(by: disposeBag)
     }
     
     deinit {
@@ -30,14 +46,17 @@ class PostViewModel {
     }
     
     @objc fileprivate func getPostDetail(_ notification: NSNotification) {
-        getPostDetail(id : notification.object as! Int)
+        getPostDetail(id : notification.object as! Int) { res in
+            
+        }
     }
     
     var alertEvent = PublishSubject<MsgType>()
     
     var postData = BehaviorRelay<[PostData]>(value: [])
     
-    var postDetailData = PublishSubject<PostData>()
+    var postDetailData = BehaviorRelay<PostData>(value: PostData(id: 0, title: "", content: "", images: [], is_published: true, user_id: 0, created_at: "", updated_at: ""))
+    
     
     @Published var meta : MetaData? = nil
     
@@ -59,12 +78,12 @@ class PostViewModel {
     fileprivate func submitData(data: PostData){
         DispatchQueue.main.async {
             self.errMsg = nil
-            self.postDetailData.onNext(data)
+            self.postDetailData.accept(data)
             self.isLoading.accept(false)
         }
     }
     
-    func fetchTodosWithObservable() {
+    func initFetchPostViewModel() {
         print(#fileID, #function, #line, "- fetchTodosWithObservable")
         
         DispatchQueue.main.async {
@@ -90,7 +109,7 @@ class PostViewModel {
             .disposed(by: disposeBag)
     }
     
-    func getPostDetail(id : Int) {
+    func getPostDetail(id : Int, completion : @escaping (Bool) -> Void) {
         
         DispatchQueue.main.async {
             self.isLoading.accept(true)
@@ -99,8 +118,7 @@ class PostViewModel {
         PostService.shared.getDetailPageData(id: id)
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] result in
-                guard let self = self,
-                      let result = result.data
+                guard let self = self
                 else {
                     return
                 }
@@ -161,5 +179,41 @@ class PostViewModel {
             default: break
             }
         }
+    }
+}
+
+extension PostViewModel {
+    
+    /// 로딩 팝업 띄우기
+    /// - Returns: 로딩 팝업
+    func showLoadingPopup() -> LoadingView?{
+        print(#fileID, #function, #line, "- <#comment#>")
+        
+        let parentVC = UIApplication.shared.topViewController()
+        
+        if parentVC is LoadingView {
+            return nil
+        }
+        
+        print("parent = \(parentVC)")
+        let loadingPopupVC = LoadingView()
+        
+        // 뷰컨트롤러가 보여지는 스타일
+        loadingPopupVC.modalPresentationStyle = .overFullScreen
+        
+        // 뷰컨트롤러가 사라지는 스타일
+        loadingPopupVC.modalTransitionStyle = .crossDissolve
+        
+        parentVC?.present(loadingPopupVC, animated: true, completion: nil)
+        
+        return loadingPopupVC
+    }
+    
+    /// 로딩 팝업 띄우기
+    /// - Returns: 로딩 팝업
+    func stopLoadingPopup(loadingVC : LoadingView?){
+        print(#fileID, #function, #line, "- <#comment#>")
+
+        loadingVC?.dismiss(animated: true)
     }
 }

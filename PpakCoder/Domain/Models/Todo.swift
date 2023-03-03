@@ -19,3 +19,8 @@ struct TodoData : Codable, Hashable {
     var created_at : String
     var updated_at : String
 }
+
+struct TodoResponse : Codable {
+    var data : TodoData?
+    var message : String
+}

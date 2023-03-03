@@ -16,7 +16,7 @@ class PostView : UIViewController, PostViewProtocol {
     @IBOutlet weak var postCollectionView: UICollectionView!
     
     
-    var postVM : PostViewModel = PostViewModel.shared {
+    var postVM : PostViewModel = PostViewModel() {
         didSet {
             print(#fileID, #function, #line, "- viewModel: \(postVM)")
         }
@@ -24,6 +24,7 @@ class PostView : UIViewController, PostViewProtocol {
      
     let bag = DisposeBag()
     var postData : [PostData] = []
+    
     override func viewDidLoad() {
         print("init \(postVM.isLoading.value)")
         bindViewModel(postVM)
@@ -99,11 +100,12 @@ extension PostView: SkeletonCollectionViewDataSource, UICollectionViewDelegate,U
         
         let id = postData[indexPath.row].id
         
-        NotificationCenter.default.post(name: Notification.Name(rawValue: PostViewModel.postDetailNotificationName), object: id)
-        guard let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailView") else {
+        guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailView") as? PostDetailView else {
             return
         }
-        self.navigationController?.pushViewController(homeVC, animated: true)
+        
+        detailVC.id = id
+        self.navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 

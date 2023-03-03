@@ -24,29 +24,37 @@ class PostDetailView : UIViewController, PostViewProtocol, DetailViewProtocol {
     
     @IBOutlet weak var userName: UILabel!
     
+    @IBOutlet weak var contentView: UIView!
     let bag = DisposeBag()
-//    let skeletonAnimation = SkeletonAnimationBuilder().makeSlidingAnimation(withDirection: .leftRight)
-    var postDetailData : PostData = PostData(id: 0, title: "", content: "", is_published: true, created_at: "0000-00-00")
+    let skeletonAnimation = SkeletonAnimationBuilder().makeSlidingAnimation(withDirection: .leftRight)
+    var postDetailData : PostData = PostData(id: 0, title: "", content: "", images: [], is_published: true, user_id: 0, created_at: "", updated_at: "")
     
-    var postVM : PostViewModel = PostViewModel.shared {
+    var viewModel : PostDetailViewModel = PostDetailViewModel() {
         didSet {
-            print(#fileID, #function, #line, "- viewModel: \(postVM)")
+            print(#fileID, #function, #line, "- viewModel: \(viewModel)")
         }
     }
-    
     override func viewDidLoad() {
-        initDetailView()
-        bindViewModel(PostViewModel.shared)
-        
+        postTitle.isSkeletonable = true
+        contentView.showSkeleton()
+        bindViewModel(viewModel)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.initDetailView()
             self.view.hideSkeleton()
         }
-        
     }
-    
+
     func initDetailView() {
-        backButton.addTarget(self, action: #selector(backButtonTapped(_:)), for: .touchUpInside)
         
+        postTitle.text = "\(postDetailData.title)"
+        postContent.text = postDetailData.content
+        postCreateDate.text = postDetailData.created_at
+        postDetailData.images?.forEach({ image in
+            postImage.kf.setImage(with: URL(string: image.url))
+            
+        })
+        
+        backButton.addTarget(self, action: #selector(backButtonTapped(_:)), for: .touchUpInside)
     }
     
     //Protocol Function
@@ -55,25 +63,18 @@ class PostDetailView : UIViewController, PostViewProtocol, DetailViewProtocol {
         self.tabBarController?.tabBar.isHidden = false
     }
     
-    func bindViewModel(_ viewModel: PostViewModel?) {
+    func bindViewModel(_ viewModel: PostDetailViewModel?) {
     
-        self.view.showSkeleton()
-        
         guard let viewModel = viewModel else {
             print("\(viewModel) is not Founded")
             return
         }
+        if let id = id {
+            viewModel.getPostDetail(id: id)
+            print("Before = \(viewModel.postDetailData.value)")
+        }
         
-        viewModel.postDetailData.subscribe { data in
-            if let data = data.element {
-                data.images?.forEach({ image in
-                    self.postImage.kf.setImage(with: URL(string: image.url))
-                })
-                self.postTitle.text = data.title
-                self.postContent.text = data.content
-                self.postCreateDate.text = data.created_at
-                self.userName.text = "\(data.user_id)"
-            }
-        }.disposed(by: bag)
+        viewModel.postDetailData.bind(to: self.rx.postDetailData).disposed(by: bag)
+    
     }
 }

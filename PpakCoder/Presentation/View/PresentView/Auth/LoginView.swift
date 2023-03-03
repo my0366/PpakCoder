@@ -24,7 +24,6 @@ class LoginView : UIViewController {
         super.viewDidLoad()
         createPickerView()
         dismissPickerView()
-        
     }
     
     func createPickerView() {

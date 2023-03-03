@@ -9,8 +9,8 @@ import UIKit
 import FSPagerView
 class BoardingView: UIViewController,FSPagerViewDelegate,FSPagerViewDataSource {
     
-    fileprivate let onBoardingImage = ["OnBoarding1.png", "OnBoarding2.png", "OnBoarding3.png"]
-
+    fileprivate let onBoardingImage = ["OnBoarding4.png", "OnBoarding7.png"]
+    
     @IBOutlet weak var boardingLabel: UILabel!
     @IBOutlet weak var onBoardingView: FSPagerView! {
         didSet {
@@ -39,7 +39,7 @@ class BoardingView: UIViewController,FSPagerViewDelegate,FSPagerViewDataSource {
         self.onBoardingView.delegate = self
         // Do any additional setup after loading the view.
     }
-
+    
     @IBAction func leftButtonClicked(_ sender: Any) {
         if self.onBoardingPageControl.currentPage == 0 {
             
@@ -52,7 +52,7 @@ class BoardingView: UIViewController,FSPagerViewDelegate,FSPagerViewDataSource {
     }
     
     @IBAction func rightButtonClicked(_ sender: Any) {
-        if self.onBoardingPageControl.currentPage == 2 {
+        if self.onBoardingPageControl.currentPage == 1 {
             
         } else {
             self.onBoardingPageControl.currentPage = self.onBoardingPageControl.currentPage + 1
@@ -81,10 +81,7 @@ class BoardingView: UIViewController,FSPagerViewDelegate,FSPagerViewDataSource {
         
         if self.onBoardingPageControl.currentPage == 1{
             self.boardingLabel.text = "오늘도 빡코딩!"
-        } else if targetIndex == 2 {
-            self.boardingLabel.text = "코딩과 함께"
-        } else if self.onBoardingPageControl.currentPage == 3 {
-            self.boardingLabel.text = "카페코딩 호로록"
+            
         }
     }
 }
